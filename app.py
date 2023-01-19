@@ -5,8 +5,7 @@ FLASK_APP=app.py FLASK_DEBUG=1 TEMPLATES_AUTO_RELOAD=1 flask run
 import os, json
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
-from flask import send_from_directory, jsonify
-
+from flask import send_from_directory, jsonify, render_template
 from ml_module import ML_Module
 
 UPLOAD_FOLDER = './temp'
@@ -27,7 +26,6 @@ def allowed_file(filename):
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
@@ -42,18 +40,10 @@ def upload_file():
             tokens['filename']=os.path.join(token_dir, filename)
             file.save(tokens['filename'])
             print ('File saved at ',tokens['filename'])
-
             return redirect(url_for('predict', name=tokens['filename']))
- 
-    return '''
-    <!doctype html>
-    <title>Upload photo to be recognized!</title>
-    <h1>Upload photo to be recognized!</h1>
-    <form method=post enctype=multipart/form-data>
-      <input type=file name=file>
-      <input type=submit value=Upload>
-    </form>
-    '''
+
+    return render_template('main.html')
+
 
 @app.route('/uploads/<name>')
 def download_file(name):
