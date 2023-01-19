@@ -60,7 +60,8 @@ def tokenize(token):
 
 @app.route('/status')
 def status():
-    return jsonify ({"status":current_status, 'token':tokens['id']})
+    response_json= jsonify ({"status":current_status, 'token':tokens['id']})
+    return response_json
 
 @app.route("/test")
 def test():
@@ -71,7 +72,7 @@ def test():
 def predict():
     path_file=tokens['filename']
     # todo: call function for prediction
-    ml = ML_Module(p1=1,p2=2)
+    ml = ML_Module()
     ml.load_model()
     payload=ml.predict(ifile=path_file)
     response_json=json.dumps( payload)

@@ -5,8 +5,7 @@ import numpy as np
 from deepface import DeepFace 
 
 class ML_Module:
-    def __init__(self, p1, p2):
-        self.hyperparameter={'p1':p1, 'p2':p2}
+    def __init__(self, config_json={}):
         self.model_name = 'Facenet512'
         self.path_db_embedding='database/data_deepface.json'
     
@@ -14,7 +13,7 @@ class ML_Module:
         print ("loading model")
         payload={'model':{'status':'loaded'}}
         return payload
-    def predict(self, ifile):
+    def predict(self, ifile, verbose=0):
         print ('predicting...')
         print (f'ifile: {ifile}')
 
@@ -35,32 +34,13 @@ class ML_Module:
         #payload=df_final.reset_index().to_json()
         response_dic=df_final.to_dict('list')        
         payload=response_dic
+        print (payload) if verbose>0 else None
         return payload
     def train(self, ifile):
         print ('training...')
         print (f'ifile: {ifile}')
         payload={'trained':{'acc':0.9, 'loss':0.001}}
         return payload
-
-    def generate_embedding2(self, ipath):
-        if not os.path.isdir(ipath):
-            ipath=os.path.dirname(ipath)
-
-        path_dir=ipath
-        print (f'generating embeddings for {path_dir}...')
-        label=os.path.basename(path_dir)
-        p_dic={}
-        listFiles= [ f for f in os.listdir(path_dir) if f if not f.startswith('.') ]
-        #embeddings = DeepFace.represent(img_path = ifile, model_name = self.model_name,enforce_detection=False)
-        encodedList=[]
-        for f in listFiles:
-            path_image=os.path.join(path_dir,f)
-            embeddings=f"embedding of {path_image}"
-            d={label:{f:embeddings}}
-            encodedList.append([d]) 
-        print (encodedList)
-        with open(self.path_db_embedding, 'w') as f:
-            json.dump(encodedList, f)
         
     def generate_embedding(self,ipath):
 
@@ -91,6 +71,7 @@ class ML_Module:
 
 
 def main(argv):
+   default_config={}
    opts, args = getopt.getopt(argv,"m:i:",["mode=","ifile="])
    for opt, arg in opts:
       if opt in ("-i", "--ifile"):
@@ -99,16 +80,15 @@ def main(argv):
          mode = arg
    print (f'Mode:{mode}, ifile:{ifile}')
    if mode=='train':
-         ml=ML_Module(p1=1,p2=2)
+         ml=ML_Module()
          ml.train(ifile)
    elif mode=='predict':
-         ml=ML_Module(p1=1,p2=2)
+         ml=ML_Module(config_json=default_config)
          ml.load_model()
-         ml.predict(ifile)
+         ml.predict(ifile, verbose=1)
          print ('predicted')
    elif mode=='embedding':
-         ml=ML_Module(p1=1,p2=2)
-         #ml.load_model()
+         ml=ML_Module(config_json=default_config)
          payload=ml.generate_embedding(ifile)
          
 if __name__ == "__main__":
